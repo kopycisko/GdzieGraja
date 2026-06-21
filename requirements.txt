@@ -1,0 +1,11 @@
+# --- Silnik scrapujący (Crawl4AI + Playwright) ---
+crawl4ai>=0.4.0
+playwright>=1.40.0
+
+# --- Sztuczna Inteligencja (SDK od Google) ---
+google-genai>=0.1.0
+pydantic>=2.0.0
+
+# --- Narzędzia pomocnicze ---
+python-dotenv>=1.0.0
+requests>=2.31.0

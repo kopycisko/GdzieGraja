@@ -32,31 +32,25 @@ jobs:
           python-version: '3.10'
           cache: 'pip' # Przyspiesza kolejne uruchomienia korzystając z pamięci podręcznej pip
 
-      # 3. Zainstaluj systemowe zależności wymagane przez headless Chromium w Playwright
-      - name: Install system dependencies for Playwright
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgbm-dev libnss3 libnspr4 libasound2 libatk-bridge2.0-0 libgtk-3-0
-
-      # 4. Zainstaluj wymagane paczki Pythona ze stars-stacku
+      # 3. Zainstaluj wymagane paczki Pythona bezpośrednio z zamrożonego pliku wymagań
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip
-          pip install crawl4ai playwright google-genai pydantic
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      # 5. Zainstaluj i zainicjuj bibliotekę Playwright dla headless Chromium (silnik Crawl4AI)
-      - name: Initialize Playwright (Chromium)
+      # 4. Zainstaluj binarne Chromium oraz brakujące zależności systemowe (Ubuntu 24.04 kompatybilne)
+      - name: Install Playwright Chromium and System Deps
         run: |
-          playwright install chromium
+          npx playwright install chromium --with-deps
 
-      # 6. Uruchom skrypt scrapujący i porządkujący bazy danych w repozytorium
+      # 5. Uruchom skrypt scrapujący i porządkujący bazy danych w repozytorium
       - name: Run Python Scraper script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python crawler/run.py
 
-      # 7. Automatyczne wypchnięcie zmian do repozytorium (Git Commit & Push), jeśli wykryto zmodyfikowane bazy danych
+      # 6. Automatyczne wypchnięcie zmian do repozytorium (Git Commit & Push), jeśli wykryto zmodyfikowane bazy danych
       - name: Commit and push changes if detected
         run: |
           git config --global user.name "github-actions[bot]"
@@ -90,7 +84,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
 
       # 3. Zainstaluj zależności npm
@@ -113,4 +107,3 @@ jobs:
       # 6. Wypchnij na GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
-
