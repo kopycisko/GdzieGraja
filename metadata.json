@@ -1,0 +1,6 @@
+{
+  "name": "GdzieGrają - Jazz Wrocław",
+  "description": "Niezbędnik wrocławskiego fana jazzu - baza artystów, koncertów oraz automatyczny system klasyfikacji koncertowej.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

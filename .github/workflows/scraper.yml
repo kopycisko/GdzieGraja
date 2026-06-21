@@ -1,0 +1,116 @@
+# .github/workflows/scraper.yml
+name: "Automatic Jazz Concert scraper"
+
+on:
+  schedule:
+    # Uruchamiaj codziennie o 04:00 rano UTC (06:00 czasu polskiego)
+    - cron: '0 4 * * *'
+  workflow_dispatch: # Pozwala na ręczne wymuszenie scrapowania z poziomu panelu GitHub Actions
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Pobierz kod repozytorium
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      # 2. Skonfiguruj środowisko Python 3.10
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip' # Przyspiesza kolejne uruchomienia korzystając z pamięci podręcznej pip
+
+      # 3. Zainstaluj systemowe zależności wymagane przez headless Chromium w Playwright
+      - name: Install system dependencies for Playwright
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgbm-dev libnss3 libnspr4 libasound2 libatk-bridge2.0-0 libgtk-3-0
+
+      # 4. Zainstaluj wymagane paczki Pythona ze stars-stacku
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install crawl4ai playwright google-genai pydantic
+
+      # 5. Zainstaluj i zainicjuj bibliotekę Playwright dla headless Chromium (silnik Crawl4AI)
+      - name: Initialize Playwright (Chromium)
+        run: |
+          playwright install chromium
+
+      # 6. Uruchom skrypt scrapujący i porządkujący bazy danych w repozytorium
+      - name: Run Python Scraper script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python crawler/run.py
+
+      # 7. Automatyczne wypchnięcie zmian do repozytorium (Git Commit & Push), jeśli wykryto zmodyfikowane bazy danych
+      - name: Commit and push changes if detected
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Sprawdź czy pliki baz danych uległy zmianie
+          git add src/data/concerts_upcoming.ts src/data/concerts_archive.ts
+          
+          # Jeśli wystąpiły różnice (diff), zatwierdź je i wypchnij bezpiecznie do głównego branchu
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(data): automatyczna codzienna aktualizacja bazy koncertów [skrypt-bot]"
+            git push origin HEAD:${{ github.ref_name }}
+            echo "Pomyślnie zapisano zaktualizowane pliki TypeScript do repozytorium."
+          else
+            echo "Brak nowych koncertów lub zmian - baza danych jest w pełni aktualna."
+          fi
+
+  build-and-deploy:
+    needs: scrape-and-update
+    if: always() && needs.scrape-and-update.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Pobierz kod repozytorium (pobierając najnowsze zmiany bot-a z Job 1)
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      # 2. Skonfiguruj Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      # 3. Zainstaluj zależności npm
+      - name: Install npm dependencies
+        run: npm install
+
+      # 4. Zbuduj produkcyjnie statyczne pliki
+      - name: Build static files
+        run: npm run build
+
+      # 5. Skonfiguruj GitHub Pages i prześlij artefakty
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      # 6. Wypchnij na GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+
