@@ -11,6 +11,11 @@ from pydantic import BaseModel, Field
 
 # Próba zaimportowania bibliotek potrzebnych do pełnego działania skryptu
 try:
+    import chompjs
+except ImportError:
+    print("Ostrzeżenie: Pakiet 'chompjs' nie jest zainstalowany. Zainstaluj go komendą: pip install chompjs")
+
+try:
     from google import genai
     from google.genai import types
     from google.genai.errors import APIError
@@ -139,12 +144,12 @@ def match_scraped_event_multiple(raw_artist: str, raw_title: str, artists: List[
 
 
 # ==============================================================================
-# 2. Parsowanie plików tekstowych TypeScript (Uelastycznienie JSON)
+# 2. Parsowanie plików tekstowych TypeScript ZA POMOCĄ CHOMPJS
 # ==============================================================================
 def parse_ts_array_file(filepath: str) -> List[Dict[str, Any]]:
     """
     Bezpiecznie czyta plik TypeScript, wyodrębnia deklarację tablicy []
-    i parsuje go do postaci słowników Pythona poprzez sanitację do czystego JSON.
+    i parsuje go bezpośrednio do obiektów Pythona za pomocą chompjs.
     """
     if not os.path.exists(filepath):
         print(f"[PRE-LOAD] Plik {filepath} nie istnieje.")
@@ -154,53 +159,25 @@ def parse_ts_array_file(filepath: str) -> List[Dict[str, Any]]:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
             
-        # Wyłapujemy wszystko pomiędzy pierwszym '[' po znaku '=' a ostatnim ']'
+        # Wyłapujemy początek tablicy po znaku równości '='
         eq_idx = content.find("=")
-        if eq_idx == -1:
-            start = content.find("[")
-        else:
-            start = content.find("[", eq_idx)
-            
-        end = content.rfind("]")
-        if start == -1 or end == -1:
+        start = content.find("[", eq_idx) if eq_idx != -1 else content.find("[")
+        
+        if start == -1:
+            print(f"[PRE-LOAD] Nie znaleziono tablicy zbiorczej w pliku: {filepath}")
             return []
             
-        raw_array = content[start:end+1]
+        raw_array_content = content[start:]
         
-        # Wyczyszczenie komentarzy
-        raw_array = re.sub(r'//.*', '', raw_array)
-        raw_array = re.sub(r'/\*.*?\*/', '', raw_array, flags=re.DOTALL)
+        # Chompjs parsuje surowy kod JS/TS (obsługuje brak cudzysłowów przy kluczach,
+        # wiszące przecinki, komentarze wewnątrz kodu oraz słowo kluczowe undefined)
+        return chompjs.parse_js_object(raw_array_content)
         
-        # Przemianowanie 'undefined' na 'null'
-        raw_array = re.sub(r'\bundefined\b', 'null', raw_array)
-        
-        # Zapewnienie, że klucze obiektów będą w cudzysłowach, a single-quoted strings zamienione na double-quoted
-        def quote_keys_fn(js_text):
-            pattern = r'("(?:\\.|[^"\\])*")|(\'(?:\\.|[^\'\\])*\')|(\b[a-zA-Z_$][a-zA-Z0-9_$]*\s*:)'
-            def replace_match(match):
-                if match.group(1):
-                    return match.group(1)
-                elif match.group(2):
-                    inner_val = match.group(2)[1:-1].replace('"', '\\"')
-                    return f'"{inner_val}"'
-                elif match.group(3):
-                    key_part = match.group(3).strip()[:-1].strip()
-                    return f'"{key_part}":'
-                return match.group(0)
-            return re.sub(pattern, replace_match, js_text)
-
-        raw_array = quote_keys_fn(raw_array)
-        
-        # Usunięcie ewentualnych wiszących przecinków przed zamknięciem nawiasów klamrowych lub kwadratowych
-        raw_array = re.sub(r',\s*}', '}', raw_array)
-        raw_array = re.sub(r',\s*\]', ']', raw_array)
-        
-        # Ustabilizowanie Carriage Returns i użycie strict=False przy deserializacji JSON
-        raw_array = raw_array.replace('\r\n', '\n').replace('\r', '\n')
-        
-        return json.loads(raw_array, strict=False)
+    except NameError:
+        print("[PRE-LOAD] Krytyczny błąd: Moduł 'chompjs' nie jest załadowany. Sprawdź instalację.")
+        return []
     except Exception as e:
-        print(f"[PRE-LOAD] Błąd parsowania pliku TS {filepath}: {e}")
+        print(f"[PRE-LOAD] Błąd parsowania pliku TS {filepath} za pomocą chompjs: {e}")
         return []
 
 def write_ts_array_file(filepath: str, var_name: str, data: List[Dict[str, Any]]):
@@ -369,7 +346,7 @@ W polu sourceUrl dla każdego wyodrębnionego wydarzenia wpisz bezwzględnie naj
 
 Instrukcje ekstrakcji:
 1. Data (date) musi mieć format: YYYY-MM-DD. Jeśli w tekście podany jest tylko dzień i miesiąc (np. "22 czerwca"), przyjmij bieżący rok wydarzenia projektowy (2026).
-2. Godzina (time) musi mieć format: HH:MM. Jeśli brak informacji, ustaw "20:00".
+2. Godzina (time) must mieć format: HH:MM. Jeśli brak informacji, ustaw "20:00".
 3. Dla każdego wydarzenia staraj się wyodrębnić pełną nazwę artysty lub zespołu i zapisać ją w polu rawArtistName.
 4. Zwróć tylko rzeczywiste, autentyczne wydarzenia. Wyeliminuj powtarzające się stałe elementy strony, reklamy czy odnośniki nawigacyjne.
 
@@ -434,7 +411,6 @@ async def main():
         print("[CRAWLER] Crawler przejdzie w tryb demonstracyjny z mockowaniem API Gemini...")
         
     # 2. Załaduj listę stron do zeskrapowania
-    # (Pobieramy z wrocławskich klubów oraz NFM)
     urls_to_scrape = [
         "https://vertigojazz.pl/pl/events",
         "https://www.nfm.wroclaw.pl/wydarzenia",
@@ -453,14 +429,12 @@ async def main():
         return
         
     # 5. Agregacja i wysyłka do Gemini
-    # Łączymy wyniki w jeden ciąg tekstowy dla zaoszczędzenia tokenów i zminimalizowania wywołań API (tylko 1 zapytanie)
     aggregated_md = ""
     for url, md in markdown_results.items():
         aggregated_md += f"\n\n=== ŹRÓDŁO STRONY: {url} ===\n{md}"
         
     extracted_events_raw = []
     
-    # Jeśli mamy klucz API, wywołujemy Gemini, w przeciwnym razie robimy mock dla testu integracji
     if os.environ.get("GEMINI_API_KEY"):
         try:
             extracted_events_raw = extract_events_with_gemini(aggregated_md, urls_to_scrape)
@@ -468,7 +442,6 @@ async def main():
             print(f"[MAIN] Błąd wywoływania Gemini API: {ex}")
     else:
         print("[MAIN] [TRYB MOCK] Symuluję pobranie przykładowych koncertów z sieci...")
-        # Kilka mocków, które automatycznie się zaklasyfikują dzięki naszemu matcherowi!
         extracted_events_raw = [
             {
                 "date": "2026-06-25",
@@ -494,7 +467,7 @@ async def main():
 
     # 6. Klasyfikacja za pomocą algorytmu dopasowującego (Matcher)
     print("\n" + "-" * 50)
-    print("[MATCH-ENGINE] Rozpoczynam automatyczną klasyfikację ścisłą i rozmytą...")
+    print("[MATCH-ENGINE] Rozpoczynam automatyczną klasyfikację ścisłą i rozmyta...")
     print("-" * 50)
     
     new_concerts_list = []
@@ -502,15 +475,12 @@ async def main():
         raw_artist = raw_ev.get("rawArtistName") or ""
         raw_title = raw_ev.get("title") or ""
         
-        # Klasyfikacja artysty na podstawie imienia/aliasów/członków/Levenshteina
         artist_ids = match_scraped_event_multiple(raw_artist, raw_title, artists_db)
         
-        # NIE ZNAMY ARTYSTY - NIE DODAJEMY KONCERTU (pusta tablica oznacza brak dodania)
         if not artist_ids:
             print(f"[MATCH] Ignorowano koncert bez znanego artysty: {raw_artist} - {raw_title}")
             continue
             
-        # Tworzenie stabilnego ID na podstawie daty i nazwy
         title_slug = re.sub(r'[^a-zA-Z0-9]', '-', (raw_title or raw_artist).lower())
         title_slug = re.sub(r'-+', '-', title_slug).strip('-')
         primary_artist_id = artist_ids[0]
@@ -543,21 +513,17 @@ async def main():
     
     print(f"[INTEGRATOR] Odczytano bazie lokalnej: {len(existing_upcoming)} nadchodzących, {len(existing_archive)} archiwalnych.")
     
-    # Łączymy wszystkie dotychczasowe koncerty w jedną wielką pulę, by dokonać ponownej segregacji i deduplikacji
     full_pool = []
     full_pool.extend(existing_upcoming)
     full_pool.extend(existing_archive)
     full_pool.extend(new_concerts_list)
     
-    # Deduplikacja oparta na unikalnym kluczu: Data + Tytuł (lub rawArtistName)
     dedup_dict = {}
     for conn in full_pool:
-        # Zapewnienie zgodności ze strukturą artistIds
         if "artistId" in conn and "artistIds" not in conn:
             aid = conn["artistId"]
             conn["artistIds"] = [aid] if aid and aid != "unclassified" else []
             
-        # Puste tablice i/lub brak artistIds odrzucamy we wszelkich nowo dodanych danych
         if not conn.get("artistIds"):
             continue
             
@@ -565,10 +531,8 @@ async def main():
         title_part = conn.get("title") or conn.get("rawArtistName") or "untitled"
         title_part = title_part.lower().strip()
         
-        # Klucz deduplikacyjny
         key = f"{date_part}::{title_part}"
         
-        # Jeśli koncert już istnieje, zachowujemy ten z pełniejszym dopisaniem
         if key in dedup_dict:
             existing_conn = dedup_dict[key]
             if len(existing_conn.get("artistIds", [])) == 0 and len(conn.get("artistIds", [])) > 0:
@@ -579,9 +543,7 @@ async def main():
     unique_pool = list(dedup_dict.values())
     print(f"[INTEGRATOR] Po deduplikacji pozostało: {len(unique_pool)} unikalnych wydarzeń w całej historii.")
     
-    # 8. Podział na wydarzenia nadchodzące i archiwalne na podstawie AKTUALNEJ DATY urzędowej wrocławskiej
-    # Dla spójności z aplikacją i zrzutami ekranu używamy wirtualnego lub dzisiejszego czasu
-    # Ustalmy dzisiejszą datę progową systemową (dzisiejsza data to 2026-06-20 zgodnie z layoutem)
+    # 8. Podział na wydarzenia nadchodzące i archiwalne
     today_str = "2026-06-20"
     print(f"[INTEGRATOR] Podział na nadchodzące i archiwalne pod datę graniczną: {today_str}")
     
@@ -589,7 +551,6 @@ async def main():
     classified_archive = []
     
     for conn in unique_pool:
-        # Bardzo bezpieczne sprawdzenie daty
         date_str = conn.get("date", "")
         if not date_str:
             continue
@@ -599,7 +560,6 @@ async def main():
         else:
             classified_archive.append(conn)
             
-    # Sorting (Nadchodzące rosnąco chronologicznie, Archiwalne malejąco chronologicznie)
     classified_upcoming.sort(key=lambda x: (x.get("date", ""), x.get("time", "")))
     classified_archive.sort(key=lambda x: (x.get("date", ""), x.get("time", "")), reverse=True)
     
@@ -614,5 +574,4 @@ async def main():
     print("=" * 80)
 
 if __name__ == "__main__":
-    # Obsługa asynchroniczności
     asyncio.run(main())

@@ -41,7 +41,7 @@ jobs:
       # 4. Zainstaluj binarne Chromium oraz brakujące zależności systemowe (Ubuntu 24.04 kompatybilne)
       - name: Install Playwright Chromium and System Deps
         run: |
-          npx playwright install chromium --with-deps
+          python -m playwright install chromium --with-deps
 
       # 5. Uruchom skrypt scrapujący i porządkujący bazy danych w repozytorium
       - name: Run Python Scraper script
@@ -85,7 +85,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: 'npm'
 
       # 3. Zainstaluj zależności npm
       - name: Install npm dependencies
