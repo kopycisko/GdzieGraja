@@ -13,5 +13,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-06-29T08:59:50.660842",
+  },
+  {
+    id: "2026-07-04-vertigo-marcin-wasilewski-trio-bee-gees-trio",
+    artistIds: ["marcin-wasilewski-trio"],
+    rawArtistName: "Bee Gees Trio",
+    title: "Bee Gees Trio",
+    venue: "Vertigo Jazz Club & Restaurant",
+    date: "2026-07-04",
+    time: "20:00",
+    price: "TBA",
+    ticketUrl: "",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-02T07:32:40.885034",
   }
 ];
