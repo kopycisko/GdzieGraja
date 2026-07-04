@@ -39,5 +39,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-07-03T07:21:08.481502",
+  },
+  {
+    id: "2026-07-06-opatovi-piotr-wojtasik-ion-virlan-quintet",
+    artistIds: ["piotr-wojtasik"],
+    rawArtistName: "Ion Virlan Quintet",
+    title: "Ion Virlan Quintet",
+    venue: "OpatoVice Beach Bar",
+    date: "2026-07-06",
+    time: "20:00",
+    price: "Free",
+    ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-ion-virlan-quintet/",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-04T06:47:44.223128",
   }
 ];
