@@ -52,5 +52,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-ion-virlan-quintet/",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-07-04T06:47:44.223128",
+  },
+  {
+    id: "2026-07-10-vertigo-piotr-wojtasik-vsjf-piotr-baron-quintet-w-programie-wodecki-jazz",
+    artistIds: ["piotr-wojtasik"],
+    rawArtistName: "Piotr Baron Quintet",
+    title: "VSJF: Piotr Baron Quintet w programie Wodecki Jazz",
+    venue: "Vertigo Jazz Club & Restaurant",
+    date: "2026-07-10",
+    time: "20:00",
+    price: "TBA",
+    ticketUrl: "",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-08T06:28:42.538915",
   }
 ];
