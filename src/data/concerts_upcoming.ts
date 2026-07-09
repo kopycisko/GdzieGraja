@@ -65,5 +65,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-07-08T06:28:42.538915",
+  },
+  {
+    id: "2026-07-11-forest -marcin-wasilewski-trio-vsjf-summer-vibes-trio",
+    artistIds: ["marcin-wasilewski-trio"],
+    rawArtistName: "Summer Vibes Trio",
+    title: "VSJF: Summer Vibes Trio",
+    venue: "Forest Bar we Wrocławiu",
+    date: "2026-07-11",
+    time: "18:00",
+    price: "Darmowe",
+    ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-summer-vibes-trio/",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-09T07:37:41.931737",
   }
 ];
