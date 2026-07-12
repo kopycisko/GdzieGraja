@@ -91,5 +91,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-07-11T06:13:43.617800",
+  },
+  {
+    id: "2026-07-14-jazz tr-marcin-wasilewski-trio-vsjf-kuba-lechki-trio",
+    artistIds: ["marcin-wasilewski-trio"],
+    rawArtistName: "Kuba Lechki Trio",
+    title: "VSJF: Kuba Lechki Trio",
+    venue: "Jazz Tramwaj (Przystanek: Opera)",
+    date: "2026-07-14",
+    time: "16:00",
+    price: "TBA",
+    ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-kuba-lechki-trio/",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-12T06:33:11.424518",
   }
 ];
