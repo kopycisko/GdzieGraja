@@ -104,5 +104,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-kuba-lechki-trio/",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-07-12T06:33:11.424518",
+  },
+  {
+    id: "2026-07-16-arche k-piotr-wojtasik-vsjf-the-music-of-blue-note",
+    artistIds: ["piotr-wojtasik"],
+    rawArtistName: "Kuba Lechki Quintet",
+    title: "VSJF: The Music Of Blue Note",
+    venue: "Arche Klasztor Wrocław",
+    date: "2026-07-16",
+    time: "20:00",
+    price: "TBA",
+    ticketUrl: "",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-15T06:14:14.886019",
   }
 ];
