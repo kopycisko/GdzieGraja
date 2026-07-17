@@ -117,5 +117,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-07-15T06:14:14.886019",
+  },
+  {
+    id: "2026-07-19-wyspa d-marcin-wasilewski-trio-vsjf-matusz-szkil-trio",
+    artistIds: ["marcin-wasilewski-trio"],
+    rawArtistName: "Matusz Szkil Trio",
+    title: "VSJF: Matusz Szkil Trio",
+    venue: "Wyspa Daliowa",
+    date: "2026-07-19",
+    time: "16:00",
+    price: "Darmowe",
+    ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-matusz-szkil-trio/",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-17T06:16:05.759034",
   }
 ];
