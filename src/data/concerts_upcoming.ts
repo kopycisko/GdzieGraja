@@ -130,5 +130,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-matusz-szkil-trio/",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-07-17T06:16:05.759034",
+  },
+  {
+    id: "2026-07-24-vertigo-piotr-wojtasik-vsjf-adam-jarzmik-quintet",
+    artistIds: ["piotr-wojtasik"],
+    rawArtistName: "Adam Jarzmik Quintet",
+    title: "VSJF: Adam Jarzmik Quintet",
+    venue: "Vertigo Jazz Club & Restaurant",
+    date: "2026-07-24",
+    time: "20:00",
+    price: "TBA",
+    ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-adam-jarzmik-quintet/",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-22T06:29:10.665146",
   }
 ];
