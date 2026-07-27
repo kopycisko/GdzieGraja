@@ -143,5 +143,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "https://vertigojazz.pl/wydarzenia/vsjf-adam-jarzmik-quintet/",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-07-22T06:29:10.665146",
+  },
+  {
+    id: "2026-07-29-pitlane-marcin-wasilewski-trio-vsjf-marek-napi-rkowski-trio-konkubinap",
+    artistIds: ["marcin-wasilewski-trio"],
+    rawArtistName: "Marek Napiórkowski Trio",
+    title: "VSJF: Marek Napiórkowski Trio – KonKubiNap",
+    venue: "Pitlane Summer Bar",
+    date: "2026-07-29",
+    time: "20:00",
+    price: "TBA",
+    ticketUrl: "",
+    sourceUrl: "https://vertigojazz.pl/wydarzenia/vsjf-marek-napiorkowski-trio-konkubinap/",
+    scrapedAt: "2026-07-27T07:31:06.467503",
   }
 ];
