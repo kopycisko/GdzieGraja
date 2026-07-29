@@ -156,5 +156,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "",
     sourceUrl: "https://vertigojazz.pl/wydarzenia/vsjf-marek-napiorkowski-trio-konkubinap/",
     scrapedAt: "2026-07-27T07:31:06.467503",
+  },
+  {
+    id: "2026-07-31-wyspa d-marcin-wasilewski-trio-vsjf-mateusz-szkil-trio",
+    artistIds: ["marcin-wasilewski-trio"],
+    rawArtistName: "Mateusz Szkil Trio",
+    title: "VSJF: Mateusz Szkil Trio",
+    venue: "Wyspa Daliowa",
+    date: "2026-07-31",
+    time: "16:00",
+    price: "0 PLN",
+    ticketUrl: "",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-07-29T06:31:11.121492",
   }
 ];
