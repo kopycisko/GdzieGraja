@@ -182,5 +182,18 @@ export const initialUpcomingConcerts: Concert[] = [
     ticketUrl: "",
     sourceUrl: "https://vertigojazz.pl/pl/events",
     scrapedAt: "2026-08-06T06:30:33.487162",
+  },
+  {
+    id: "2026-08-10-vertigo-piotr-wojtasik-tok-owicz-lechki-quintet-the-music-of-wayne-shorter-juju",
+    artistIds: ["piotr-wojtasik"],
+    rawArtistName: "Tokłowicz/Lechki Quintet",
+    title: "Tokłowicz/Lechki Quintet – The music of Wayne Shorter – JuJu",
+    venue: "Vertigo Jazz Club & Restaurant",
+    date: "2026-08-10",
+    time: "20:00",
+    price: "TBA",
+    ticketUrl: "",
+    sourceUrl: "https://vertigojazz.pl/pl/events",
+    scrapedAt: "2026-08-07T05:40:30.163541",
   }
 ];
